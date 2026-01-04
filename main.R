@@ -21,4 +21,33 @@ read_all_datasets <- function(folder_path = NULL) {
 
 data <- read_all_datasets()
 
+# Function to clean a single dataset
+clean_dataset <- function(df) {
+    # Remove rows where OBS_VALUE is NA or empty
+    df <- df[!is.na(df$OBS_VALUE) & df$OBS_VALUE != "", ]
 
+    # Remove metadata columns that are not useful for analysis
+    cols_to_remove <- c("DATAFLOW", "LAST.UPDATE", "CONF_STATUS", "OBS_FLAG")
+    df <- df[, !(names(df) %in% cols_to_remove)]
+
+    # Convert TIME_PERIOD to numeric (year)
+    if ("TIME_PERIOD" %in% names(df)) {
+        df$TIME_PERIOD <- as.numeric(df$TIME_PERIOD)
+    }
+
+    # Ensure OBS_VALUE is numeric
+    if ("OBS_VALUE" %in% names(df)) {
+        df$OBS_VALUE <- as.numeric(df$OBS_VALUE)
+    }
+
+    return(df)
+}
+
+# Function to clean all datasets
+clean_all_datasets <- function(datasets) {
+    cleaned <- lapply(datasets, clean_dataset)
+    return(cleaned)
+}
+
+# Clean the data
+data <- clean_all_datasets(data)
