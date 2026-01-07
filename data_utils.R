@@ -1,7 +1,13 @@
 read_all_datasets <- function(folder_path = NULL) {
     if (is.null(folder_path)) {
-        script_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
-        folder_path <- file.path(script_dir, "dataset")
+        if (dir.exists("dataset")) {
+            folder_path <- "dataset"
+        } else if (dir.exists("../dataset")) {
+            folder_path <- "../dataset"
+        } else {
+             # Fallback to current directory or throw error if not found
+             stop("Could not find 'dataset' directory in current or parent directory.")
+        }
     }
 
     csv_files <- list.files(path = folder_path, pattern = "\\.csv$", full.names = TRUE)

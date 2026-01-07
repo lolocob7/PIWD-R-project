@@ -9,25 +9,25 @@
 
 library(shiny)
 
-# Define UI for application that draws a histogram
+# Define UI for application
 fluidPage(
 
     # Application title
-    titlePanel("Old Faithful Geyser Data"),
+    titlePanel("Unemployment Data Analysis"),
 
-    # Sidebar with a slider input for number of bins
+    # Sidebar with a dropdown for Country selection
     sidebarLayout(
         sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
+            selectInput("country",
+                "Select Country:",
+                choices = unique(unemployment_data$geo),
+                selected = "Austria"
+            )
         ),
 
-        # Show a plot of the generated distribution
+        # Show the plot
         mainPanel(
-            plotOutput("distPlot")
+            plotOutput("trendPlot")
         )
     )
 )

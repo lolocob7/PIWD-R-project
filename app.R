@@ -8,10 +8,10 @@ library(countrycode)
 library(viridis)
 
 # ========= 1) Wczytanie danych =========
-# Zakładamy, że masz plik dane.rds w folderze z app.R
 script_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(script_dir)
 dane <- readRDS("./dataset/dane.rds")
+
 
 # Minimalna kontrola: upewnij się, że kluczowe kolumny istnieją
 req_cols <- c("zmienna","geo","TIME_PERIOD","OBS_VALUE","unit","sex","age")
@@ -51,7 +51,7 @@ prepare_map_df <- function(df, z, rok, sex_val, age_val) {
   out
 }
 
-# ========= 4) UI =========
+# ========= 4) UI ========= 
 ui <- fluidPage(
   titlePanel("Mapa ciepła Europy – dane Eurostatu"),
   
