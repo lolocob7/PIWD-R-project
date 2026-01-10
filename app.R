@@ -1,6 +1,3 @@
-install.packages(c("shiny","dplyr","tidyr","purrr","ggplot2","sf","rnaturalearth","countrycode","viridis"))
-
-
 # app.R ------------------------------------------------------------
 suppressPackageStartupMessages({
   library(shiny)
@@ -12,16 +9,17 @@ suppressPackageStartupMessages({
   library(rnaturalearth)
   library(countrycode)
   library(viridis)
+  library(rsconnect)
 })
 
 # =========================
 # 0) KONFIGURACJA PROJEKTU
 # =========================
-script_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
-setwd(script_dir)
-# Wybrane wskaźniki (zmień tu nazwy na te, które masz w liście / danych)
+# Wybrane wskaźniki
+PKB_NAME <- "pkb_per_capita"
+
 SELECTED_VARS <- c(
-  "pkb_per_capita",
+  PKB_NAME,
   "dlugosc_dnia_pracy",
   "stopa_bezrobocia",
   "korzystanie_z_internetu",
@@ -29,9 +27,8 @@ SELECTED_VARS <- c(
   "oczekiwana_dlugosc_zycia"
 )
 
-PKB_NAME <- "pkb_per_capita"
 
-# EU-27 (ISO3) – twarda lista, pewna i stabilna
+# Lista kodów EU-27 (ISO3) 
 EU27_ISO3 <- c(
   "AUT","BEL","BGR","HRV","CYP","CZE","DNK","EST","FIN","FRA",
   "DEU","GRC","HUN","IRL","ITA","LVA","LTU","LUX","MLT","NLD",
@@ -49,7 +46,7 @@ pick_value_col <- function(df) {
   hit[1]
 }
 
-# Z LISTY (Eurostat DF) -> long: zmienna, geo, rok, value
+# Funkcja przygotowująca dane z listy Eurostatu do formatu długiego (zmienna, geo, rok, value)
 prep_one_from_list <- function(df, name) {
   val <- pick_value_col(df)
   if (!("geo" %in% names(df))) stop(name, ": brak kolumny geo")
@@ -68,9 +65,10 @@ prep_one_from_list <- function(df, name) {
     summarise(value = mean(value, na.rm = TRUE), .groups = "drop")
 }
 
-# Z JEDNEJ TABELI (Twoje "dane") -> long: zmienna, geo, rok, value
+# Funkcja przygotowująca dane z pojedynczej tabeli użytkownika do formatu długiego
 prep_from_table <- function(dane_tbl) {
-  # obsługujemy Twoje nazwy kolumn
+  
+  # obsługiwane tylko te nazwy kolumn
   stopifnot(all(c("zmienna","geo","TIME_PERIOD","OBS_VALUE") %in% names(dane_tbl)))
   
   dane_tbl %>%
@@ -101,6 +99,7 @@ load_input_as_long <- function(path = "input.rds") {
   long_all
 }
 
+data <- load_input_as_long()
 # =========================
 # 2) Mapa Europy + łączenie krajów
 # =========================
@@ -214,14 +213,14 @@ ui <- navbarPage(
 # =========================
 server <- function(input, output, session) {
   
-  # --- wczytanie danych na start
+  # wczytanie danych na start
   long_all <- reactiveVal(NULL)
   
   observe({
     df <- load_input_as_long("input.rds") %>%
       filter(zmienna %in% SELECTED_VARS)
     
-    # dopasuj ISO3 (do UE i do map)
+    # przypisanie ISO3 do krajów oraz mapy UE
     df <- df %>%
       mutate(iso3 = countrycode(geo, origin = "country.name", destination = "iso3c"))
     
@@ -258,7 +257,7 @@ server <- function(input, output, session) {
     sort(unique(df$rok[df$zmienna == var]))
   }
   
-  # --- UI: lata
+  # UI: lata
   output$map_year_ui <- renderUI({
     yrs <- years_for_var(input$map_var)
     sliderInput("map_year", "Rok:", min(yrs), max(yrs), value = max(yrs), step = 1, sep = "")
@@ -292,7 +291,7 @@ server <- function(input, output, session) {
   })
   
   
-  # --- UI: kraje do trendu (wg dostępnych danych)
+  # UI: kraje do trendu (wg dostępnych danych)
   output$country_ui <- renderUI({
     df <- long_all(); req(df)
     d <- df %>% filter(zmienna == input$trend_var)
@@ -531,10 +530,9 @@ server <- function(input, output, session) {
       summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
       pivot_wider(names_from = zmienna, values_from = value)
     
-    # które kolumny naprawdę są w wide (i mają sens do korelacji)
     vars_in_wide <- intersect(SELECTED_VARS, names(wide))
     
-    # usuń zmienne, które są całe NA albo mają za mało danych
+    # usunięcie zmiennych, które mają wartości NA
     vars_ok <- keep(vars_in_wide, function(v) sum(!is.na(wide[[v]])) >= 10)
     
     validate(
