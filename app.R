@@ -105,6 +105,7 @@ load_input_as_long <- function(path = "input.rds") {
 # 2) Mapa Europy + łączenie krajów
 # =========================
 europa_sf <- ne_countries(continent = "Europe", returnclass = "sf") %>%
+  mutate(iso_a3 = ifelse(iso_a3 == "-99", adm0_a3, iso_a3)) %>%
   select(name, iso_a3, geometry)
 
 # =========================
