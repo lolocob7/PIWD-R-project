@@ -46,7 +46,7 @@ pick_value_col <- function(df) {
   hit[1]
 }
 
-# Z LISTY (Eurostat DF) -> long: zmienna, geo, rok, value
+# Funkcja przygotowująca dane z listy Eurostatu do formatu długiego (zmienna, geo, rok, value)
 prep_one_from_list <- function(df, name) {
   val <- pick_value_col(df)
   if (!("geo" %in% names(df))) stop(name, ": brak kolumny geo")
@@ -65,7 +65,7 @@ prep_one_from_list <- function(df, name) {
     summarise(value = mean(value, na.rm = TRUE), .groups = "drop")
 }
 
-# Z JEDNEJ TABELI (Twoje "dane") -> long: zmienna, geo, rok, value
+# Funkcja przygotowująca dane z pojedynczej tabeli użytkownika do formatu długiego
 prep_from_table <- function(dane_tbl) {
   
   # obsługiwane tylko te nazwy kolumn
