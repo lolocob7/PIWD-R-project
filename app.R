@@ -17,7 +17,8 @@ suppressPackageStartupMessages({
 # =========================
 # 0) KONFIGURACJA PROJEKTU
 # =========================
-
+script_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(script_dir)
 # Wybrane wskaźniki (zmień tu nazwy na te, które masz w liście / danych)
 SELECTED_VARS <- c(
   "pkb_per_capita",
