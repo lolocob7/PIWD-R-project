@@ -17,10 +17,11 @@ suppressPackageStartupMessages({
 # =========================
 # Wybrane wskaźniki
 PKB_NAME <- "pkb_per_capita"
-
+script_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(script_dir)
 SELECTED_VARS <- c(
   PKB_NAME,
-  "dlugosc_dnia_pracy",
+  "dlugosc_tygodnia_pracy",
   "stopa_bezrobocia",
   "korzystanie_z_internetu",
   "satysfakcja_z_zycia",
@@ -38,7 +39,8 @@ EU27_ISO3 <- c(
 # =========================
 # 1) Wczytanie i ujednolicenie danych
 # =========================
-
+script_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(script_dir)
 pick_value_col <- function(df) {
   cand <- c("OBS_VALUE","obs_value","value","Value","values")
   hit <- cand[cand %in% names(df)]
@@ -99,7 +101,6 @@ load_input_as_long <- function(path = "input.rds") {
   long_all
 }
 
-data <- load_input_as_long()
 # =========================
 # 2) Mapa Europy + łączenie krajów
 # =========================
@@ -115,7 +116,7 @@ ui <- navbarPage(
   tabPanel("Mapa",
            sidebarLayout(
              sidebarPanel(
-               selectInput("map_var", "Wskaźnik:", choices = SELECTED_VARS, selected = "dlugosc_dnia_pracy"),
+               selectInput("map_var", "Wskaźnik:", choices = SELECTED_VARS, selected = "dlugosc_tygodnia_pracy"),
                uiOutput("map_year_ui"),
                checkboxInput("only_eu", "Pokaż tylko UE (EU-27)", FALSE),
                helpText("Mapa: wartość wskaźnika w danym roku (kraj–rok).")
@@ -129,7 +130,7 @@ ui <- navbarPage(
   tabPanel("Rankingi",
            sidebarLayout(
              sidebarPanel(
-               selectInput("rank_var", "Wskaźnik:", choices = SELECTED_VARS, selected = "dlugosc_dnia_pracy"),
+               selectInput("rank_var", "Wskaźnik:", choices = SELECTED_VARS, selected = "dlugosc_tygodnia_pracy"),
                uiOutput("rank_year_ui"),
                radioButtons("rank_mode", "Tryb:", choices = c("Top 10"="top", "Bottom 10"="bottom"), inline = TRUE),
                checkboxInput("only_eu_rank", "Tylko UE", FALSE)
@@ -145,7 +146,7 @@ ui <- navbarPage(
   tabPanel("Trendy",
            sidebarLayout(
              sidebarPanel(
-               selectInput("trend_var", "Wskaźnik:", choices = SELECTED_VARS, selected = "dlugosc_dnia_pracy"),
+               selectInput("trend_var", "Wskaźnik:", choices = SELECTED_VARS, selected = "dlugosc_tygodnia_pracy"),
                uiOutput("country_ui"),
                checkboxInput("only_eu_trend", "Tylko UE", FALSE)
              ),
@@ -161,7 +162,7 @@ ui <- navbarPage(
              sidebarPanel(
                uiOutput("scatter_year_ui"),
                selectInput("scatter_y", "Y (vs PKB):", choices = setdiff(SELECTED_VARS, PKB_NAME),
-                           selected = "dlugosc_dnia_pracy"),
+                           selected = "dlugosc_tygodnia_pracy"),
                checkboxInput("only_eu_scatter", "Tylko UE", FALSE),
                hr(),
                selectInput("scatter_x2", "X (dowolne):", choices = SELECTED_VARS, selected = PKB_NAME),
