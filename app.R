@@ -17,8 +17,6 @@ suppressPackageStartupMessages({
 # =========================
 # Wybrane wskaźniki
 PKB_NAME <- "pkb_per_capita"
-script_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
-setwd(script_dir)
 SELECTED_VARS <- c(
   PKB_NAME,
   "dlugosc_tygodnia_pracy",
@@ -39,8 +37,7 @@ EU27_ISO3 <- c(
 # =========================
 # 1) Wczytanie i ujednolicenie danych
 # =========================
-script_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
-setwd(script_dir)
+
 pick_value_col <- function(df) {
   cand <- c("OBS_VALUE","obs_value","value","Value","values")
   hit <- cand[cand %in% names(df)]
